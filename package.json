@@ -24,6 +24,7 @@
     "browserify": "^16.5.1"
   },
   "dependencies": {
-    "asn1.js": "^5.4.1"
+    "asn1.js": "^5.4.1",
+    "asn1.js-rfc5280": "^3.0.0"
   }
 }
