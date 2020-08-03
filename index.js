@@ -1,1 +1,1 @@
-exports.asn1js = require('asn1.js');
+module.exports = require('asn1.js');
