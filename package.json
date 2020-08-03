@@ -4,7 +4,7 @@
   "description": "Browserify ASN1.js (https://github.com/indutny/asn1.js/) library",
   "main": "index.js",
   "scripts": {
-    "build": "browserify index.js -o bundle/browserified-asn1.js"
+    "build": "browserify index.js --standalone asn1 -o bundle/browserified-asn1.js"
   },
   "repository": {
     "type": "git",
