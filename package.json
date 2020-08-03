@@ -1,0 +1,29 @@
+{
+  "name": "browserify-asn1.js",
+  "version": "1.0.0",
+  "description": "Browserify ASN1.js (https://github.com/indutny/asn1.js/) library",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify index.js -o bundle/browserified-asn1.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vsenko/browserify-asn1.js.git"
+  },
+  "keywords": [
+    "asn1.js",
+    "browserify"
+  ],
+  "author": "vsenko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vsenko/browserify-asn1.js/issues"
+  },
+  "homepage": "https://github.com/vsenko/browserify-asn1.js#readme",
+  "devDependencies": {
+    "browserify": "^16.5.1"
+  },
+  "dependencies": {
+    "asn1.js": "^5.4.1"
+  }
+}
