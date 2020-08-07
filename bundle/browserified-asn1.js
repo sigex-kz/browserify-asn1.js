@@ -1,7 +1,204 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.asn1 = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 module.exports = require('asn1.js');
 module.exports.rfc5280 = require('asn1.js-rfc5280');
-},{"asn1.js":3,"asn1.js-rfc5280":2}],2:[function(require,module,exports){
+module.exports.rfc5652 = require('@sigex-kz/asn1.js-rfc5652');
+},{"@sigex-kz/asn1.js-rfc5652":2,"asn1.js":4,"asn1.js-rfc5280":3}],2:[function(require,module,exports){
+const asn1 = require('asn1.js');
+const rfc5280 = require('asn1.js-rfc5280');
+
+// AttributeValue ::= ANY
+const AttributeValue = asn1.define('AttributeValue', function define() {
+  this.any();
+});
+exports.AttributeValue = AttributeValue;
+
+// Attribute ::= SEQUENCE {
+//   attrType OBJECT IDENTIFIER,
+//   attrValues SET OF AttributeValue }
+const Attribute = asn1.define('Attribute', function define() {
+  this.seq().obj(
+    this.key('attrType').objid(),
+    this.key('attrValues').use(AttributeValue),
+  );
+});
+exports.Attribute = Attribute;
+
+// UnsignedAttributes ::= SET SIZE (1..MAX) OF Attribute
+const UnsignedAttributes = asn1.define('UnsignedAttributes', function define() {
+  this.setof(Attribute);
+});
+exports.UnsignedAttributes = UnsignedAttributes;
+
+// SignatureValue ::= OCTET STRING
+const SignatureValue = asn1.define('SignatureValue', function define() {
+  this.octstr();
+});
+exports.SignatureValue = SignatureValue;
+
+// SignatureAlgorithmIdentifier ::= AlgorithmIdentifier
+const SignatureAlgorithmIdentifier = asn1.define('SignatureAlgorithmIdentifier', function define() {
+  this.use(rfc5280.AlgorithmIdentifier);
+});
+exports.SignatureAlgorithmIdentifier = SignatureAlgorithmIdentifier;
+
+// SignedAttributes ::= SET SIZE (1..MAX) OF Attribute
+const SignedAttributes = asn1.define('SignedAttributes', function define() {
+  this.setof(Attribute);
+});
+exports.SignedAttributes = SignedAttributes;
+
+// CertificateSerialNumber ::= INTEGER
+const CertificateSerialNumber = asn1.define('CertificateSerialNumber', function define() {
+  this.int();
+});
+exports.CertificateSerialNumber = CertificateSerialNumber;
+
+// DigestAlgorithmIdentifier ::= AlgorithmIdentifier
+const DigestAlgorithmIdentifier = asn1.define('DigestAlgorithmIdentifier', function define() {
+  this.use(rfc5280.AlgorithmIdentifier);
+});
+exports.DigestAlgorithmIdentifier = DigestAlgorithmIdentifier;
+
+// IssuerAndSerialNumber ::= SEQUENCE {
+//   issuer Name,
+//   serialNumber CertificateSerialNumber }
+const IssuerAndSerialNumber = asn1.define('IssuerAndSerialNumber', function define() {
+  this.seq().obj(
+    this.key('issuer').use(rfc5280.Name),
+    this.key('serialNumber').use(CertificateSerialNumber),
+  );
+});
+exports.IssuerAndSerialNumber = IssuerAndSerialNumber;
+
+// SignerIdentifier ::= CHOICE {
+//   issuerAndSerialNumber IssuerAndSerialNumber,
+//   subjectKeyIdentifier [0] SubjectKeyIdentifier }
+const SignerIdentifier = asn1.define('SignerIdentifier', function define() {
+  this.choice({
+    issuerAndSerialNumber: this.use(IssuerAndSerialNumber),
+  });
+});
+exports.SignerIdentifier = SignerIdentifier;
+
+// CMSVersion ::= INTEGER  { v0(0), v1(1), v2(2), v3(3), v4(4), v5(5) }
+const CMSVersion = asn1.define('CMSVersion', function define() {
+  this.int({
+    0: 'v0',
+    1: 'v1',
+    2: 'v2',
+    3: 'v3',
+    4: 'v4',
+    5: 'v5',
+  });
+});
+exports.CMSVersion = CMSVersion;
+
+// SignerInfo ::= SEQUENCE {
+//   version CMSVersion,
+//   sid SignerIdentifier,
+//   digestAlgorithm DigestAlgorithmIdentifier,
+//   signedAttrs [0] IMPLICIT SignedAttributes OPTIONAL,
+//   signatureAlgorithm SignatureAlgorithmIdentifier,
+//   signature SignatureValue,
+//   unsignedAttrs [1] IMPLICIT UnsignedAttributes OPTIONAL }
+const SignerInfo = asn1.define('SignerInfo', function define() {
+  this.seq().obj(
+    this.key('version').use(CMSVersion),
+    this.key('sid').use(SignerIdentifier),
+    this.key('digestAlgorithm').use(DigestAlgorithmIdentifier),
+    this.key('signedAttrs').implicit(0).optional().use(SignedAttributes),
+    this.key('signatureAlgorithm').use(SignatureAlgorithmIdentifier),
+    this.key('signature').use(SignatureValue),
+    this.key('unsignedAttrs').implicit(1).optional().use(UnsignedAttributes),
+  );
+});
+exports.SignerInfo = SignerInfo;
+
+// SignerInfos ::= SET OF SignerInfo
+const SignerInfos = asn1.define('SignerInfos', function define() {
+  this.setof(SignerInfo);
+});
+exports.SignerInfos = SignerInfos;
+
+// CertificateChoices ::= CHOICE {
+//   certificate Certificate,
+//   extendedCertificate [0] IMPLICIT ExtendedCertificate, -- Obsolete
+//   v1AttrCert [1] IMPLICIT AttributeCertificateV1,       -- Obsolete
+//   v2AttrCert [2] IMPLICIT AttributeCertificateV2,
+//   other [3] IMPLICIT OtherCertificateFormat }
+const CertificateChoices = asn1.define('CertificateChoices', function define() {
+  this.choice({
+    certificate: this.use(rfc5280.Certificate),
+  });
+});
+exports.CertificateChoices = CertificateChoices;
+
+// CertificateSet ::= SET OF CertificateChoices
+const CertificateSet = asn1.define('CertificateSet', function define() {
+  this.setof(CertificateChoices);
+});
+exports.CertificateSet = CertificateSet;
+
+// ContentType ::= OBJECT IDENTIFIER
+const ContentType = asn1.define('ContentType', function define() {
+  this.objid({
+    '1 2 840 113549 1 7 1': 'id-data',
+    '1 2 840 113549 1 7 2': 'id-signedData',
+  });
+});
+exports.ContentType = ContentType;
+
+// EncapsulatedContentInfo ::= SEQUENCE {
+//   eContentType ContentType,
+//   eContent [0] EXPLICIT OCTET STRING OPTIONAL }
+const EncapsulatedContentInfo = asn1.define('EncapsulatedContentInfo', function define() {
+  this.seq().obj(
+    this.key('eContentType').use(ContentType),
+    this.key('eContent').explicit(0).optional().octstr(),
+  );
+});
+exports.EncapsulatedContentInfo = EncapsulatedContentInfo;
+
+// DigestAlgorithmIdentifiers ::= SET OF DigestAlgorithmIdentifier
+const DigestAlgorithmIdentifiers = asn1.define('DigestAlgorithmIdentifiers', function define() {
+  this.setof(DigestAlgorithmIdentifier);
+});
+exports.DigestAlgorithmIdentifiers = DigestAlgorithmIdentifiers;
+
+// id-signedData OBJECT IDENTIFIER ::= { iso(1) member-body(2)
+//   us(840) rsadsi(113549) pkcs(1) pkcs7(7) 2 }
+//
+// SignedData ::= SEQUENCE {
+//   version CMSVersion,
+//   digestAlgorithms DigestAlgorithmIdentifiers,
+//   encapContentInfo EncapsulatedContentInfo,
+//   certificates [0] IMPLICIT CertificateSet OPTIONAL,
+//   crls [1] IMPLICIT RevocationInfoChoices OPTIONAL,
+//   signerInfos SignerInfos }
+const SignedData = asn1.define('SignedData', function define() {
+  this.seq().obj(
+    this.key('version').use(CMSVersion),
+    this.key('digestAlgorithms').use(DigestAlgorithmIdentifiers),
+    this.key('encapContentInfo').use(EncapsulatedContentInfo),
+    this.key('certificates').implicit(0).optional().use(CertificateSet),
+    // this.key('crls').implicit(1).optional().use(RevocationInfoChoices),
+    this.key('signerInfos').use(SignerInfos),
+  );
+});
+exports.SignedData = SignedData;
+
+// ContentInfo ::= SEQUENCE {
+//   contentType ContentType,
+//   content [0] EXPLICIT ANY DEFINED BY contentType }
+const ContentInfo = asn1.define('ContentInfo', function define() {
+  this.seq().obj(
+    this.key('contentType').use(ContentType),
+    this.key('content').explicit(0).use(SignedData),
+  );
+});
+exports.ContentInfo = ContentInfo;
+
+},{"asn1.js":4,"asn1.js-rfc5280":3}],3:[function(require,module,exports){
 'use strict';
 
 const asn1 = require('asn1.js');
@@ -897,7 +1094,7 @@ const x509Extensions = {
   subjectInformationAccess: SubjectInformationAccess
 };
 
-},{"asn1.js":3}],3:[function(require,module,exports){
+},{"asn1.js":4}],4:[function(require,module,exports){
 'use strict';
 
 const asn1 = exports;
@@ -910,7 +1107,7 @@ asn1.constants = require('./asn1/constants');
 asn1.decoders = require('./asn1/decoders');
 asn1.encoders = require('./asn1/encoders');
 
-},{"./asn1/api":4,"./asn1/base":6,"./asn1/constants":10,"./asn1/decoders":12,"./asn1/encoders":15,"bn.js":18}],4:[function(require,module,exports){
+},{"./asn1/api":5,"./asn1/base":7,"./asn1/constants":11,"./asn1/decoders":13,"./asn1/encoders":16,"bn.js":19}],5:[function(require,module,exports){
 'use strict';
 
 const encoders = require('./encoders');
@@ -969,7 +1166,7 @@ Entity.prototype.encode = function encode(data, enc, /* internal */ reporter) {
   return this._getEncoder(enc).encode(data, reporter);
 };
 
-},{"./decoders":12,"./encoders":15,"inherits":22}],5:[function(require,module,exports){
+},{"./decoders":13,"./encoders":16,"inherits":23}],6:[function(require,module,exports){
 'use strict';
 
 const inherits = require('inherits');
@@ -1124,7 +1321,7 @@ EncoderBuffer.prototype.join = function join(out, offset) {
   return out;
 };
 
-},{"../base/reporter":8,"inherits":22,"safer-buffer":25}],6:[function(require,module,exports){
+},{"../base/reporter":9,"inherits":23,"safer-buffer":26}],7:[function(require,module,exports){
 'use strict';
 
 const base = exports;
@@ -1134,7 +1331,7 @@ base.DecoderBuffer = require('./buffer').DecoderBuffer;
 base.EncoderBuffer = require('./buffer').EncoderBuffer;
 base.Node = require('./node');
 
-},{"./buffer":5,"./node":7,"./reporter":8}],7:[function(require,module,exports){
+},{"./buffer":6,"./node":8,"./reporter":9}],8:[function(require,module,exports){
 'use strict';
 
 const Reporter = require('../base/reporter').Reporter;
@@ -1774,7 +1971,7 @@ Node.prototype._isPrintstr = function isPrintstr(str) {
   return /^[A-Za-z0-9 '()+,-./:=?]*$/.test(str);
 };
 
-},{"../base/buffer":5,"../base/reporter":8,"minimalistic-assert":23}],8:[function(require,module,exports){
+},{"../base/buffer":6,"../base/reporter":9,"minimalistic-assert":24}],9:[function(require,module,exports){
 'use strict';
 
 const inherits = require('inherits');
@@ -1899,7 +2096,7 @@ ReporterError.prototype.rethrow = function rethrow(msg) {
   return this;
 };
 
-},{"inherits":22}],9:[function(require,module,exports){
+},{"inherits":23}],10:[function(require,module,exports){
 'use strict';
 
 // Helper
@@ -1959,7 +2156,7 @@ exports.tag = {
 };
 exports.tagByName = reverse(exports.tag);
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 const constants = exports;
@@ -1982,7 +2179,7 @@ constants._reverse = function reverse(map) {
 
 constants.der = require('./der');
 
-},{"./der":9}],11:[function(require,module,exports){
+},{"./der":10}],12:[function(require,module,exports){
 'use strict';
 
 const inherits = require('inherits');
@@ -2319,7 +2516,7 @@ function derDecodeLen(buf, primitive, fail) {
   return len;
 }
 
-},{"../base/buffer":5,"../base/node":7,"../constants/der":9,"bn.js":18,"inherits":22}],12:[function(require,module,exports){
+},{"../base/buffer":6,"../base/node":8,"../constants/der":10,"bn.js":19,"inherits":23}],13:[function(require,module,exports){
 'use strict';
 
 const decoders = exports;
@@ -2327,7 +2524,7 @@ const decoders = exports;
 decoders.der = require('./der');
 decoders.pem = require('./pem');
 
-},{"./der":11,"./pem":13}],13:[function(require,module,exports){
+},{"./der":12,"./pem":14}],14:[function(require,module,exports){
 'use strict';
 
 const inherits = require('inherits');
@@ -2380,7 +2577,7 @@ PEMDecoder.prototype.decode = function decode(data, options) {
   return DERDecoder.prototype.decode.call(this, input, options);
 };
 
-},{"./der":11,"inherits":22,"safer-buffer":25}],14:[function(require,module,exports){
+},{"./der":12,"inherits":23,"safer-buffer":26}],15:[function(require,module,exports){
 'use strict';
 
 const inherits = require('inherits');
@@ -2677,7 +2874,7 @@ function encodeTag(tag, primitive, cls, reporter) {
   return res;
 }
 
-},{"../base/node":7,"../constants/der":9,"inherits":22,"safer-buffer":25}],15:[function(require,module,exports){
+},{"../base/node":8,"../constants/der":10,"inherits":23,"safer-buffer":26}],16:[function(require,module,exports){
 'use strict';
 
 const encoders = exports;
@@ -2685,7 +2882,7 @@ const encoders = exports;
 encoders.der = require('./der');
 encoders.pem = require('./pem');
 
-},{"./der":14,"./pem":16}],16:[function(require,module,exports){
+},{"./der":15,"./pem":17}],17:[function(require,module,exports){
 'use strict';
 
 const inherits = require('inherits');
@@ -2710,7 +2907,7 @@ PEMEncoder.prototype.encode = function encode(data, options) {
   return out.join('\n');
 };
 
-},{"./der":14,"inherits":22}],17:[function(require,module,exports){
+},{"./der":15,"inherits":23}],18:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -2864,7 +3061,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (module, exports) {
   'use strict';
 
@@ -6299,9 +6496,9 @@ function fromByteArray (uint8) {
   };
 })(typeof module === 'undefined' || module, this);
 
-},{"buffer":19}],19:[function(require,module,exports){
+},{"buffer":20}],20:[function(require,module,exports){
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (Buffer){
 /*!
  * The buffer module from node.js, for the browser.
@@ -8082,7 +8279,7 @@ function numberIsNaN (obj) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"base64-js":17,"buffer":20,"ieee754":21}],21:[function(require,module,exports){
+},{"base64-js":18,"buffer":21,"ieee754":22}],22:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -8168,7 +8365,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -8197,7 +8394,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 module.exports = assert;
 
 function assert(val, msg) {
@@ -8210,7 +8407,7 @@ assert.equal = function assertEqual(l, r, msg) {
     throw new Error(msg || ('Assertion failed: ' + l + ' != ' + r));
 };
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -8396,7 +8593,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 (function (process){
 /* eslint-disable node/no-deprecated-api */
 
@@ -8477,5 +8674,5 @@ if (!safer.constants) {
 module.exports = safer
 
 }).call(this,require('_process'))
-},{"_process":24,"buffer":20}]},{},[1])(1)
+},{"_process":25,"buffer":21}]},{},[1])(1)
 });
