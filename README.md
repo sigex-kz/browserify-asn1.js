@@ -15,9 +15,11 @@ or include it from https://sigex-kz.github.io/browserify-asn1.js/bundle/browseri
 
 ## Usage
 
-Access **ans1.js** via `asn1` global object,
-**asn1.js-rfc5280** via `asn1.rfc5280` and
-**@sigex-kz/asn1.js-rfc5652** via `asn1.rfc5652`.
+Access
+- **ans1.js** via `asn1` global object,
+- **asn1.js-rfc5280** via `asn1.rfc5280`,
+- **@sigex-kz/asn1.js-rfc5652** via `asn1.rfc5652`,
+- **Buffer** (https://github.com/feross/buffer) via `asn1.Buffer`.
 
 ```js
 const dateForm = new Date().getTime();
