@@ -4,6 +4,10 @@ Browserify ASN1.js (https://github.com/indutny/asn1.js/) library and two sets of
 - **asn1.js-rfc5280** https://github.com/indutny/asn1.js/tree/master/rfc/5280
 - **@sigex-kz/asn1.js-rfc5652** https://github.com/sigex-kz/asn1.js-rfc5652
 
+## Try
+
+Open https://sigex-kz.github.io/browserify-asn1.js (which loads browserified-asn1.js) and start hacking in web console.
+
 ## Install
 
 Grab `bundle/browserified-asn1.js`
@@ -54,4 +58,16 @@ const tbsCertContent = {
 };
 
 const tbsCertEncoded = asn1.rfc5280.TBSCertificate.encode(tbsCertContent, 'der');
+```
+
+## Develop
+
+To run local http server:
+```
+npm run http-server
+```
+
+To build bundle:
+```
+npm run build
 ```
