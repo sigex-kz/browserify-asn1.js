@@ -4,7 +4,8 @@
   "description": "Browserify ASN1.js (https://github.com/indutny/asn1.js/) library",
   "main": "index.js",
   "scripts": {
-    "build": "browserify index.js --standalone asn1 -o bundle/browserified-asn1.js"
+    "http-server": "http-server ./",
+    "build": "browserify index.js --plugin tinyify --standalone asn1 -o bundle/browserified-asn1.js"
   },
   "repository": {
     "type": "git",
@@ -21,11 +22,14 @@
   },
   "homepage": "https://github.com/vsenko/browserify-asn1.js#readme",
   "devDependencies": {
-    "browserify": "^16.5.1"
+    "browserify": "^16.5.1",
+    "http-server": "^0.12.3",
+    "tinyify": "^3.0.0"
   },
   "dependencies": {
     "@sigex-kz/asn1.js-rfc5652": "^1.0.1",
     "asn1.js": "^5.4.1",
-    "asn1.js-rfc5280": "^3.0.0"
+    "asn1.js-rfc5280": "^3.0.0",
+    "buffer": "^5.6.0"
   }
 }
