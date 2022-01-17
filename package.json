@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vsenko/browserify-asn1.js.git"
+    "url": "git+https://github.com/sigex-kz/browserify-asn1.js.git"
   },
   "keywords": [
     "asn1.js",
@@ -18,9 +18,9 @@
   "author": "vsenko",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vsenko/browserify-asn1.js/issues"
+    "url": "https://github.com/sigex-kz/browserify-asn1.js/issues"
   },
-  "homepage": "https://github.com/vsenko/browserify-asn1.js#readme",
+  "homepage": "https://github.com/sigex-kz/browserify-asn1.js#readme",
   "devDependencies": {
     "browserify": "^17.0.0",
     "http-server": "^14.1.0",
