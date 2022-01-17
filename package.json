@@ -23,7 +23,7 @@
   "homepage": "https://github.com/vsenko/browserify-asn1.js#readme",
   "devDependencies": {
     "browserify": "^17.0.0",
-    "http-server": "^0.12.3",
+    "http-server": "^14.1.0",
     "tinyify": "^3.0.0"
   },
   "dependencies": {
