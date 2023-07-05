@@ -24,7 +24,7 @@
   "devDependencies": {
     "browserify": "^17.0.0",
     "http-server": "^14.1.0",
-    "tinyify": "^3.0.0"
+    "tinyify": "^4.0.0"
   },
   "dependencies": {
     "@sigex-kz/asn1.js-rfc5652": "^1.0.3",
